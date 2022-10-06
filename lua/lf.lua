@@ -1,8 +1,13 @@
 local api = vim.api
 
+local State = {
+  Closed = 0,
+  Hidden = 1,
+  Opened = 2,
+}
+
 local Lf = {
-  loaded = false,
-  opened = false,
+  state = State.Closed,
   bufnr = nil,
   winid = nil,
   prev_winid = nil,
@@ -15,9 +20,8 @@ local Lf = {
   },
 }
 
-function Lf:on_exit()
-  self.opened = false
-  self.loaded = false
+function Lf:_close()
+  self.state = State.Closed
   if api.nvim_win_is_valid(self.winid) then
     api.nvim_win_close(self.winid, true)
   end
@@ -28,11 +32,12 @@ function Lf:on_exit()
 end
 
 function Lf:open()
-  if not self.opened then
-    self.opened = true
+  if self.state == State.Opened then
+    self:_hide()
+  else
     self.prev_winid = api.nvim_get_current_win()
 
-    if not self.loaded then
+    if self.state == State.Closed then
       self.bufnr = api.nvim_create_buf(false, true)
     end
 
@@ -48,23 +53,20 @@ function Lf:open()
     api.nvim_win_set_option(self.winid, 'winhl', 'NormalFloat:LfNormal,FloatBorder:LfBorder')
     api.nvim_win_set_option(self.winid, 'sidescrolloff', 0)
 
-    if not self.loaded then
+    if self.state == State.Closed then
       vim.fn.termopen(self.cmd, {
         on_exit = function()
-          self:on_exit()
+          self:_close()
         end,
-        width = opts.width,
       })
       api.nvim_buf_set_option(self.bufnr, 'bufhidden', 'hide')
       api.nvim_buf_set_option(self.bufnr, 'filetype', 'lf')
       api.nvim_buf_set_name(self.bufnr, 'Lf')
-      self.loaded = true
     end
 
     api.nvim_win_set_cursor(self.winid, { 1, 0 })
     vim.schedule(vim.cmd.startinsert)
-  else
-    self:_hide()
+    self.state = State.Opened
   end
 end
 
@@ -102,14 +104,19 @@ function Lf:_edit_file(path, hide)
 end
 
 function Lf:_hide()
-  self.opened = false
+  self.state = State.Hidden
   if api.nvim_win_is_valid(self.winid) then
     api.nvim_win_close(self.winid, true)
   end
 end
 
-function Lf._cd(path)
-  vim.cmd('silent cd ' .. path)
+function Lf:_cd(path)
+  api.nvim_cmd({
+    cmd = 'cd',
+    args = { path },
+    mods = { silent = true },
+  }, {})
+  api.nvim_buf_set_name(self.bufnr, 'Lf')
 end
 
 return Lf
