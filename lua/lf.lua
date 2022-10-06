@@ -1,5 +1,4 @@
 local api = vim.api
-local fn = vim.fn
 
 local Lf = {
   loaded = false,
@@ -9,6 +8,7 @@ local Lf = {
   prev_winid = nil,
   cmd = nil,
   config = {
+    hide = false,
     width = 0.9,
     height = 0.9,
     border = 'none',
@@ -49,7 +49,7 @@ function Lf:open()
     api.nvim_win_set_option(self.winid, 'sidescrolloff', 0)
 
     if not self.loaded then
-      fn.termopen(self.cmd, {
+      vim.fn.termopen(self.cmd, {
         on_exit = function()
           self:on_exit()
         end,
@@ -61,6 +61,7 @@ function Lf:open()
       self.loaded = true
     end
 
+    api.nvim_win_set_cursor(self.winid, { 1, 0 })
     vim.schedule(vim.cmd.startinsert)
   else
     self:_hide()
@@ -84,7 +85,7 @@ function Lf.setup(opts)
   api.nvim_set_hl(0, 'LfBorder', { link = 'FloatBorder', default = true })
 end
 
-function Lf:_edit_file(path)
+function Lf:_edit_file(path, hide)
   api.nvim_cmd({
     cmd = 'edit',
     args = { path },
@@ -93,7 +94,11 @@ function Lf:_edit_file(path)
   if api.nvim_win_is_valid(self.prev_winid) then
     api.nvim_win_set_buf(self.prev_winid, bufnr)
   end
-  self:_hide()
+  if hide or self.config.hide then
+    self:_hide()
+  else
+    api.nvim_win_set_buf(self.winid, self.bufnr)
+  end
 end
 
 function Lf:_hide()
