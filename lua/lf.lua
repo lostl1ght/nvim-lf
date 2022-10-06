@@ -108,4 +108,8 @@ function Lf:_hide()
   end
 end
 
+function Lf._cd(path)
+  vim.cmd('silent cd ' .. path)
+end
+
 return Lf

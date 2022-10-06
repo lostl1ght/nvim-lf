@@ -1,3 +1,4 @@
 cmd open &nvr --servername "$NVIM" --remote +"lua require'lf':_edit_file'$f'"
 map e open
 map q &nvr --servername "$NVIM" --remote +"lua require'lf':_hide()"
+map w &nvr --servername "$NVIM" --remote +"lua require'lf'._cd'$PWD'"
