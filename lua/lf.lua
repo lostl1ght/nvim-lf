@@ -52,6 +52,7 @@ function Lf:open()
     self.winid = api.nvim_open_win(self.bufnr, true, opts)
     api.nvim_win_set_option(self.winid, 'winhl', 'NormalFloat:LfNormal,FloatBorder:LfBorder')
     api.nvim_win_set_option(self.winid, 'sidescrolloff', 0)
+    api.nvim_win_set_option(self.winid, 'number', false)
 
     if self.state == State.Closed then
       vim.fn.termopen(self.cmd, {
@@ -94,7 +95,13 @@ function Lf:_edit_file(path, hide)
   }, {})
   local bufnr = api.nvim_win_get_buf(self.winid)
   if api.nvim_win_is_valid(self.prev_winid) then
+    local nu = api.nvim_win_get_option(self.prev_winid, 'number')
+    local siso = api.nvim_win_get_option(self.prev_winid, 'sidescrolloff')
+
     api.nvim_win_set_buf(self.prev_winid, bufnr)
+
+    api.nvim_win_set_option(self.prev_winid, 'number', nu)
+    api.nvim_win_set_option(self.prev_winid, 'sidescrolloff', siso)
   end
   if hide or self.config.hide then
     self:_hide()
