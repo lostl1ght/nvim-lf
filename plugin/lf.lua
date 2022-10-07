@@ -7,12 +7,7 @@ if vim.g.lf_hijack_netrw then
     once = true,
     group = group,
     callback = function()
-      api.nvim_cmd({
-        cmd = 'autocmd',
-        args = { 'FileExplorer' },
-        bang = true,
-        mods = { emsg_silent = true },
-      }, {})
+      vim.cmd('silent! autocmd! FileExplorer')
     end,
   })
 
