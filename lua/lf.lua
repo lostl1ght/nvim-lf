@@ -33,41 +33,47 @@ function Private:close()
   end
 end
 
+function Private:create_buffer()
+  self.bufnr = api.nvim_create_buf(false, true)
+  api.nvim_win_set_buf(self.winid, self.bufnr)
+  vim.fn.termopen(self.cmd, {
+    on_exit = function()
+      self:close()
+    end,
+  })
+  api.nvim_buf_set_option(self.bufnr, 'bufhidden', 'hide')
+  api.nvim_buf_set_option(self.bufnr, 'filetype', 'lf')
+end
+
+function Private:post_open_setup()
+  api.nvim_win_set_buf(self.winid, self.bufnr)
+  api.nvim_win_set_cursor(self.winid, { 1, 0 })
+  vim.schedule(vim.cmd.startinsert)
+end
+
+function Private:create_window()
+  Private.prev_winid = api.nvim_get_current_win()
+  local opts = {
+    relative = 'editor',
+    col = math.floor((1 - Private.config.width) / 2 * vim.o.columns),
+    row = math.floor((1 - Private.config.height) / 2 * vim.o.lines),
+    width = math.floor(Private.config.width * vim.o.columns),
+    height = math.floor(Private.config.height * vim.o.lines),
+    border = Private.config.border,
+  }
+  Private.winid = api.nvim_open_win(0, true, opts)
+  api.nvim_win_set_option(Private.winid, 'winhl', 'NormalFloat:LfNormal,FloatBorder:LfBorder')
+  api.nvim_win_set_option(Private.winid, 'sidescrolloff', 0)
+  api.nvim_win_set_option(Private.winid, 'number', false)
+end
+
 function Public:open()
-  if Private.state == State.Opened then
-    Private:hide()
-  else
-    Private.prev_winid = api.nvim_get_current_win()
-
+  if Private.state ~= State.Opened then
+    Private:create_window()
     if Private.state == State.Closed then
-      Private.bufnr = api.nvim_create_buf(false, true)
+      Private:create_buffer()
     end
-
-    local opts = {
-      relative = 'editor',
-      col = math.floor((1 - Private.config.width) / 2 * vim.o.columns),
-      row = math.floor((1 - Private.config.height) / 2 * vim.o.lines),
-      width = math.floor(Private.config.width * vim.o.columns),
-      height = math.floor(Private.config.height * vim.o.lines),
-      border = Private.config.border,
-    }
-    Private.winid = api.nvim_open_win(Private.bufnr, true, opts)
-    api.nvim_win_set_option(Private.winid, 'winhl', 'NormalFloat:LfNormal,FloatBorder:LfBorder')
-    api.nvim_win_set_option(Private.winid, 'sidescrolloff', 0)
-    api.nvim_win_set_option(Private.winid, 'number', false)
-
-    if Private.state == State.Closed then
-      vim.fn.termopen(Private.cmd, {
-        on_exit = function()
-          Private:close()
-        end,
-      })
-      api.nvim_buf_set_option(Private.bufnr, 'bufhidden', 'hide')
-      api.nvim_buf_set_option(Private.bufnr, 'filetype', 'lf')
-    end
-
-    api.nvim_win_set_cursor(Private.winid, { 1, 0 })
-    vim.schedule(vim.cmd.startinsert)
+    Private:post_open_setup()
     Private.state = State.Opened
   end
 end
