@@ -65,7 +65,10 @@ function Private:post_open_setup()
   api.nvim_win_set_buf(self.winid, self.bufnr)
   -- Fixes the window sliding to the left
   api.nvim_win_set_cursor(self.winid, { 1, 0 })
-  vim.schedule(vim.cmd.startinsert)
+  vim.schedule(function()
+    api.nvim_set_current_win(self.winid)
+    api.nvim_cmd({ cmd = 'startinsert' }, {})
+  end)
 end
 
 function Private:create_window()
