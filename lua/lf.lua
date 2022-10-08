@@ -64,7 +64,6 @@ function Public:open()
       })
       api.nvim_buf_set_option(Private.bufnr, 'bufhidden', 'hide')
       api.nvim_buf_set_option(Private.bufnr, 'filetype', 'lf')
-      api.nvim_buf_set_name(Private.bufnr, 'Lf')
     end
 
     api.nvim_win_set_cursor(Private.winid, { 1, 0 })
@@ -125,7 +124,6 @@ function Public:cd(path)
     args = { path },
     mods = { silent = true },
   }, {})
-  api.nvim_buf_set_name(Private.bufnr, 'Lf')
 end
 
 return Public
