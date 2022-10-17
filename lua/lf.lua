@@ -72,19 +72,19 @@ function Private:post_open_setup()
 end
 
 function Private:create_window()
-  Private.prev_winid = api.nvim_get_current_win()
+  self.prev_winid = api.nvim_get_current_win()
   local opts = {
     relative = 'editor',
-    col = math.floor((1 - Private.config.width) / 2 * vim.o.columns),
-    row = math.floor((1 - Private.config.height) / 2 * vim.o.lines),
-    width = math.floor(Private.config.width * vim.o.columns),
-    height = math.floor(Private.config.height * vim.o.lines),
-    border = Private.config.border,
+    col = math.floor((1 - self.config.width) / 2 * vim.o.columns),
+    row = math.floor((1 - self.config.height) / 2 * vim.o.lines),
+    width = math.floor(self.config.width * vim.o.columns),
+    height = math.floor(self.config.height * vim.o.lines),
+    border = self.config.border,
   }
-  Private.winid = api.nvim_open_win(0, true, opts)
-  api.nvim_win_set_option(Private.winid, 'winhl', 'NormalFloat:LfNormal,FloatBorder:LfBorder')
-  api.nvim_win_set_option(Private.winid, 'sidescrolloff', 0)
-  api.nvim_win_set_option(Private.winid, 'number', false)
+  self.winid = api.nvim_open_win(0, true, opts)
+  api.nvim_win_set_option(self.winid, 'winhl', 'NormalFloat:LfNormal,FloatBorder:LfBorder')
+  api.nvim_win_set_option(self.winid, 'sidescrolloff', 0)
+  api.nvim_win_set_option(self.winid, 'number', false)
 end
 
 -- Public interface
