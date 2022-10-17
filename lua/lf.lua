@@ -106,18 +106,18 @@ function Public.setup(opts)
     if arg.args ~= '' then
       path = arg.args
     end
-    Public:open(path)
+    Public.open(path)
   end, { nargs = '?', complete = 'dir', desc = 'Open lf' })
 
   api.nvim_create_user_command('LfHide', function()
-    Public:hide()
+    Public.hide()
   end, { nargs = 0, desc = 'Hide lf' })
 
   api.nvim_create_user_command('LfToggle', function()
     if Private.state == State.Opened then
-      Public:hide()
+      Public.hide()
     else
-      Public:open(nil)
+      Public.open(nil)
     end
   end, { nargs = 0, desc = 'Toggle lf window' })
 
@@ -129,7 +129,7 @@ end
 ---If `path` is `nil` then open in cwd
 ---else (re)open in `path`
 ---@param path string|nil path to a folder
-function Public:open(path)
+function Public.open(path)
   if path then
     Private:delete_buffer()
     -- Needed so on_exit does not close a new lf instance
@@ -146,7 +146,7 @@ function Public:open(path)
 end
 
 ---Hide lf window
-function Public:hide()
+function Public.hide()
   Private:delete_window()
   Private.state = State.Hidden
 end
@@ -155,7 +155,7 @@ end
 ---`Should only be used with remote capabilities from lfrc`
 ---@param path string path to a file
 ---@param hide boolean whether to hide the window
-function Public:edit_file(path, hide)
+function Public.edit_file(path, hide)
   api.nvim_cmd({
     cmd = 'edit',
     args = { path },
@@ -171,7 +171,7 @@ function Public:edit_file(path, hide)
     api.nvim_win_set_option(Private.prev_winid, 'sidescrolloff', siso)
   end
   if hide or Private.config.hide then
-    Public:hide()
+    Public.hide()
   else
     api.nvim_win_set_buf(Private.winid, Private.bufnr)
   end
@@ -180,7 +180,7 @@ end
 ---Change nvim's cwd
 ---`Should only be called with remote capabilities from lfrc`
 ---@param path string directory
-function Public:cd(path)
+function Public.cd(path)
   api.nvim_cmd({
     cmd = 'cd',
     args = { path },

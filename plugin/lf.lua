@@ -18,7 +18,7 @@ if vim.g.lf_hijack_netrw then
     callback = function(args)
       if vim.fn.isdirectory(args.match) == 1 then
         api.nvim_cmd({ cmd = 'bwipeout', args = { args.buf } }, {})
-        require('lf'):open(args.match)
+        require('lf').open(args.match)
       end
     end,
   })
