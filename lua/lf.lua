@@ -80,6 +80,7 @@ function Private:create_window()
     width = math.floor(self.config.width * vim.o.columns),
     height = math.floor(self.config.height * vim.o.lines),
     border = self.config.border,
+    style = 'minimal',
   }
   self.winid = api.nvim_open_win(0, true, opts)
   api.nvim_win_set_option(self.winid, 'winhl', 'NormalFloat:LfNormal,FloatBorder:LfBorder')
@@ -156,24 +157,19 @@ end
 ---@param path string path to a file
 ---@param hide boolean whether to hide the window
 function Public.edit_file(path, hide)
+  hide = hide or Private.config.hide
+  if api.nvim_win_is_valid(Private.prev_winid) then
+    api.nvim_set_current_win(Private.prev_winid)
+    if hide then
+      Public.hide()
+    end
+  end
   api.nvim_cmd({
     cmd = 'edit',
     args = { path },
   }, {})
-  local bufnr = api.nvim_win_get_buf(Private.winid)
-  if api.nvim_win_is_valid(Private.prev_winid) then
-    local nu = api.nvim_win_get_option(Private.prev_winid, 'number')
-    local siso = api.nvim_win_get_option(Private.prev_winid, 'sidescrolloff')
-
-    api.nvim_win_set_buf(Private.prev_winid, bufnr)
-
-    api.nvim_win_set_option(Private.prev_winid, 'number', nu)
-    api.nvim_win_set_option(Private.prev_winid, 'sidescrolloff', siso)
-  end
-  if hide or Private.config.hide then
-    Public.hide()
-  else
-    api.nvim_win_set_buf(Private.winid, Private.bufnr)
+  if not hide then
+    api.nvim_set_current_win(Private.winid)
   end
 end
 
